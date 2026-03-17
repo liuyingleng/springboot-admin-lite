@@ -75,24 +75,43 @@ CREATE TABLE IF NOT EXISTS sys_role_permission (
 -- 插入测试数据
 -- 密码：admin123（BCrypt加密后）
 INSERT INTO sys_user (username, password, email, phone, nickname, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', 'admin@example.com', '13800138000', '管理员', 1);
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', 'admin@example.com', '13800138000', '管理员', 1),
+('test', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', 'test@example.com', '13800138001', '测试用户', 1);
 
 -- 插入角色
 INSERT INTO sys_role (role_name, role_code, description) VALUES
-('管理员', 'ROLE_ADMIN', '系统管理员'),
-('普通用户', 'ROLE_USER', '普通用户');
+('管理员', 'ROLE_ADMIN', '系统管理员，拥有所有权限'),
+('普通用户', 'ROLE_USER', '普通用户，只有查看权限');
 
--- 插入权限（菜单）
+-- 插入权限（菜单 + 按钮）
 INSERT INTO sys_permission (name, code, type, path, component, icon, sort, parent_id) VALUES
-('仪表盘', 'dashboard', 'menu', '/dashboard', 'dashboard/index', 'dashboard', 1, 0),
-('系统管理', 'system', 'menu', '/system', 'layout', 'system', 2, 0),
-('用户管理', 'system:user', 'menu', '/system/user', 'system/user/index', 'user', 1, 2),
-('角色管理', 'system:role', 'menu', '/system/role', 'system/role/index', 'role', 2, 2),
-('权限管理', 'system:permission', 'menu', '/system/permission', 'system/permission/index', 'permission', 3, 2);
+-- 一级菜单
+('仪表盘', 'dashboard', 'menu', '/dashboard', 'dashboard/index', 'LayoutDashboard', 1, 0),
+('系统管理', 'system', 'menu', '/system', NULL, 'Settings', 2, 0),
+-- 系统管理子菜单
+('用户管理', 'system:user', 'menu', '/system/users', 'system/users/index', 'Users', 1, 2),
+('角色管理', 'system:role', 'menu', '/system/roles', 'system/roles/index', 'Shield', 2, 2),
+-- 用户管理按钮权限
+('用户查看', 'user:view', 'button', NULL, NULL, NULL, 1, 3),
+('用户创建', 'user:create', 'button', NULL, NULL, NULL, 2, 3),
+('用户编辑', 'user:edit', 'button', NULL, NULL, NULL, 3, 3),
+('用户删除', 'user:delete', 'button', NULL, NULL, NULL, 4, 3),
+-- 角色管理按钮权限
+('角色查看', 'role:view', 'button', NULL, NULL, NULL, 1, 4),
+('角色创建', 'role:create', 'button', NULL, NULL, NULL, 2, 4),
+('角色编辑', 'role:edit', 'button', NULL, NULL, NULL, 3, 4),
+('角色删除', 'role:delete', 'button', NULL, NULL, NULL, 4, 4),
+('角色分配权限', 'role:assign', 'button', NULL, NULL, NULL, 5, 4);
 
 -- 分配用户角色
-INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
+INSERT INTO sys_user_role (user_id, role_id) VALUES
+(1, 1),  -- admin -> ROLE_ADMIN
+(2, 2);  -- test  -> ROLE_USER
 
--- 分配角色权限
+-- 分配角色权限（管理员拥有所有权限）
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5);
+(1, 1), (1, 2), (1, 3), (1, 4),
+(1, 5), (1, 6), (1, 7), (1, 8),
+(1, 9), (1, 10), (1, 11), (1, 12), (1, 13),
+-- 普通用户只有查看权限
+(2, 1), (2, 5), (2, 9);
